@@ -14,5 +14,6 @@ jobs:
       - name: mask secret
         shell: bash
         run: |
+          : # no-op so the step header is just "Run :"
           val=${{ inputs.USER_SECRET }}
           echo "::add-mask::$val"
