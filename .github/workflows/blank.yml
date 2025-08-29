@@ -14,12 +14,13 @@ jobs:
       - name: Mask secret
         shell: bash
         run: |
-          : # no-op so step header is safe
+          set +x
           val="${{ inputs.user_secret }}"
-          echo "::add-mask::$val"
+          echo "::add-mask::${val}"
 
       - name: Test logs
         shell: bash
         run: |
           val="${{ inputs.user_secret }}"
           echo "This will be masked: $val"
+
