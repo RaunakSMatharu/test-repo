@@ -1,0 +1,65 @@
+name: secure-manual-input
+on:
+  workflow_dispatch:
+    inputs:
+      secret_value:
+        description: "Enter value (won't be printed)"
+        required: true
+        type: string
+
+permissions:
+  contents: read
+  id-token: write
+
+jobs:
+  run:
+    # use your own runner label(s) if self-hosted, e.g. ["self-hosted","linux"]
+    runs-on: ubuntu-latest
+    steps:
+      - name: Abort if debug logging is on (prevents accidental leakage)
+        if: env.ACTIONS_STEP_DEBUG == 'true'
+        run: |
+          echo "Debug logging is enabled; aborting to protect secret."
+          exit 1
+
+      - name: Mask immediately
+        # Runner intercepts this workflow command; the raw value won't appear in logs.
+        run: |
+          echo "::add-mask::${{ inputs.secret_value }}"
+
+      - name: Store in a locked temp file (never echo)
+        id: stash
+        shell: bash
+        run: |
+          set -euo pipefail
+          umask 077
+          tmp="$(mktemp "$RUNNER_TEMP/secret.XXXXXX")"
+          chmod 600 "$tmp"
+          # write without newline and never print it
+          printf '%s' '${{ inputs.secret_value }}' > "$tmp"
+          echo "file=$tmp" >> "$GITHUB_OUTPUT"
+
+      - name: Use the value without logging it
+        env:
+          SECRET_FILE: ${{ steps.stash.outputs.file }}
+        run: |
+          set -euo pipefail
+          secret="$(<"$SECRET_FILE")"
+          #
+          # >>> Do your work here without echoing $secret <<<
+          #
+          # Example: write only metadata to the step summary (no secret)
+          echo "Received a value with $(( ${#secret} )) characters." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Securely delete temp file
+        if: always()
+        env:
+          SECRET_FILE: ${{ steps.stash.outputs.file }}
+        run: |
+          set -euo pipefail
+          if command -v shred >/dev/null 2>&1; then
+            shred -u "$SECRET_FILE"
+          else
+            rm -f "$SECRET_FILE"
+          fi
+
