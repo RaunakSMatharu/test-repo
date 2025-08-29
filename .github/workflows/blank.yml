@@ -11,16 +11,20 @@ jobs:
   mask-job:
     runs-on: ubuntu-latest
     steps:
-      - name: Mask secret
-        shell: bash
-        run: |
-          set +x
-          val="${{ inputs.user_secret }}"
-          echo "::add-mask::${val}"
+      # Register the mask without printing the value
+      - name: Mask secret (no echo)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const p = process.env.GITHUB_EVENT_PATH;
+            const evt = JSON.parse(fs.readFileSync(p, 'utf8'));
+            const secret = evt.inputs.user_secret;
+            core.setSecret(secret); // registers mask; nothing printed
 
+      # Your original step — now safely redacts to ***
       - name: Test logs
         shell: bash
         run: |
           val="${{ inputs.user_secret }}"
           echo "This will be masked: $val"
-
