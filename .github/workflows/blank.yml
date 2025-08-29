@@ -1,19 +1,25 @@
-name: use-local-secret
+name: test-mask
 on:
   workflow_dispatch:
-    inputs: 
-      USER_SECRET:
-        description: "secret_value"
+    inputs:
+      user_secret:
+        description: "Secret value"
         required: true
-        
+        type: string
 
 jobs:
-  secure-job:
+  mask-job:
     runs-on: ubuntu-latest
     steps:
-      - name: mask secret
+      - name: Mask secret
         shell: bash
         run: |
-          : # no-op so the step header is just "Run :"
-          val=${{ inputs.USER_SECRET }}
+          : # no-op so step header is safe
+          val="${{ inputs.user_secret }}"
           echo "::add-mask::$val"
+
+      - name: Test logs
+        shell: bash
+        run: |
+          val="${{ inputs.user_secret }}"
+          echo "This will be masked: $val"
