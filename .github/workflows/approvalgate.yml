@@ -1,0 +1,29 @@
+name: aprovalgate-test1
+on:
+  workflow_dispatch:
+    inputs:
+      keyname:
+        description: "Environment key (dev, staging, prod)"
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Building..."
+
+  approve:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: keyvault-approve
+    steps:
+      - run: echo "Approval gate for ${{ inputs.keyname }}"
+
+  deploy:
+    needs: approve
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo "Deploying to ${{ inputs.keyname }}"
+
