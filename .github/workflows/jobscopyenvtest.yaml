@@ -26,6 +26,7 @@ jobs:
 
       # Expose the value as a job output (safe; not printed)
       - id: emit
+        name: env-maskingstep
         shell: bash
         run: echo "secret=${{ inputs.secret_value }}" >> "$GITHUB_OUTPUT"
 
