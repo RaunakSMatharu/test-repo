@@ -25,6 +25,10 @@ jobs:
 
       - id: emit
         run: echo "secret=${{ inputs.secret_value }}" >> $GITHUB_OUTPUT
+        
+      - name: Check size of secret (bytes)
+        run: |
+          echo -n "${{ inputs.secret_value }}" | wc -c
 
   use-secret-job:
     runs-on: ubuntu-latest
@@ -34,3 +38,4 @@ jobs:
         run: |
           mysecret="${{ needs.mask-job.outputs.SECRET_OUT }}"
           echo "Secret is: $mysecret"  # will show as ***
+          echo -n "$secret" | wc -c
