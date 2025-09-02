@@ -1,0 +1,36 @@
+name: final-test-mask
+on:
+  workflow_dispatch:
+    inputs:
+      secret_value:
+        description: "Secret value"
+        required: true
+        type: string
+
+jobs:
+  mask-job:
+    runs-on: ubuntu-latest
+    outputs:
+      SECRET_OUT: ${{ steps.emit.outputs.secret }}
+    steps:
+      - name: Mask secret (no echo)
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            const p = process.env.GITHUB_EVENT_PATH;
+            const evt = JSON.parse(fs.readFileSync(p, 'utf8'));
+            const secret = evt.inputs.secret_value;
+            core.setSecret(secret);
+
+      - id: emit
+        run: echo "secret=${{ inputs.secret_value }}" >> $GITHUB_OUTPUT
+
+  use-secret-job:
+    runs-on: ubuntu-latest
+    needs: mask-job
+    steps:
+      - name: Use the secret (will be masked in logs)
+        run: |
+          mysecret="${{ needs.mask-job.outputs.SECRET_OUT }}"
+          echo "Secret is: $mysecret"  # will show as ***
