@@ -1,4 +1,4 @@
-name: test-mask-1
+name: final-mask
 on:
   workflow_dispatch:
     inputs:
