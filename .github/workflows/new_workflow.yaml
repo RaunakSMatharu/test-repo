@@ -21,10 +21,13 @@ jobs:
             const evt = JSON.parse(fs.readFileSync(p, 'utf8'));
             const secret = evt.inputs.secret_value;
             core.setSecret(secret); // registers mask; nothing printed
-
+  print-job:
+    runs-on: ubuntu-latest
+    steps:
       # Your original step — now safely redacts to ***
       - name: Test logs
         shell: bash
         run: |
           key_secret_val="${{ inputs.secret_value }}"
           echo "This will be masked: $key_secret_val"
+    
