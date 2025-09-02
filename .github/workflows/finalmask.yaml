@@ -11,7 +11,7 @@ jobs:
   mask-job:
     runs-on: ubuntu-latest
     outputs:
-      SECRET_OUT: ${{ steps.emit.outputs.secret }}
+      SECRET_OUT: ${{ steps.emit.outputs.secret }}   # expose step output at job level
     steps:
       - name: Mask secret (no echo)
         uses: actions/github-script@v7
@@ -23,7 +23,7 @@ jobs:
             const secret = evt.inputs.secret_value;
             core.setSecret(secret);
 
-      - id: emit   # 👈 give this step an ID
+      - id: emit
         run: |
           echo "secret=${{ inputs.secret_value }}" >> $GITHUB_OUTPUT
 
@@ -38,5 +38,5 @@ jobs:
       - name: Check size of secret passed from previous job
         run: |
           secret="${{ needs.mask-job.outputs.SECRET_OUT }}"
-          echo "Secret is: $secret"   # will be masked
+          echo "Secret is: $secret"   # will print masked as ***
           echo -n "$secret" | wc -c
