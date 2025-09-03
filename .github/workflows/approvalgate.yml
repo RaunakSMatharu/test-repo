@@ -1,4 +1,4 @@
-name: aprovalgate-test1
+name: ${{ inputs.keyname }}-aprovalgate-test1
 on:
   workflow_dispatch:
     inputs:
