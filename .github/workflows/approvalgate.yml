@@ -1,4 +1,4 @@
-name: ${{ inputs.keyname }}-aprovalgate-test1
+name: aprovalgate-test1
 on:
   workflow_dispatch:
     inputs:
@@ -6,7 +6,7 @@ on:
         description: "Environment key (dev, staging, prod)"
         required: true
         type: string
-
+run-name: ${{ inputs.keyname }}-aprovalgate-test1
 jobs:
   build:
     runs-on: ubuntu-latest
