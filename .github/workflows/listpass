@@ -1,0 +1,35 @@
+name: Pass List Example
+
+on:
+  workflow_dispatch:
+
+jobs:
+  create-list:
+    runs-on: ubuntu-latest
+    outputs:
+      mylist: ${{ steps.set-output.outputs.list }}
+    steps:
+      - name: Create list and set output
+        id: set-output
+        run: |
+          list=("value1" "value2" "value3")
+
+          if [[ ${#list[@]} -gt 0 ]]; then
+            echo "list=${list[@]}" >> $GITHUB_OUTPUT
+          fi
+
+  consume-list:
+    needs: create-list
+    runs-on: ubuntu-latest
+    steps:
+      - name: Use list output
+        run: |
+          list="${{ needs.create-list.outputs.mylist }}"
+          echo "Got list: $list"
+
+          # Convert back into array
+          arr=($list)
+          echo "Looping through values:"
+          for v in "${arr[@]}"; do
+            echo " - $v"
+          done
